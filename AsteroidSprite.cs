@@ -11,6 +11,8 @@ namespace AsteroidsGame
     /// </summary>
     public class AsteroidSprite : Sprite
     {
+        
+        
         public AsteroidSprite(int x, int y) : base(x, y)
         {
             MaxSpeed = 800;
