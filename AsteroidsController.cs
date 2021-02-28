@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace AsteroidsGame
 {
@@ -12,29 +11,28 @@ namespace AsteroidsGame
 
         private Random generator = new Random(100);
 
-        private double spawnTime = 2.0D;
+        private Rectangle boundary;
+
+        private double spawnTime;
 
         private double timeToSpawn;
-
-        private Vector2 gameArea;
 
         private Texture2D image;
 
         private double timeDecrease;
 
         private int maxSpeed = 800;
-        private int speed = 200;
         private int acceleration = 20;
 
-        public AsteroidsController(Vector2 gameArea, Texture2D image)
+        private int speed;
+
+        public AsteroidsController(Rectangle boundary, Texture2D image)
         {
-            this.gameArea = gameArea;
             this.image = image;
+            this.boundary = boundary;
 
             Asteroids = new List<AsteroidSprite>();
-
-            timeToSpawn = spawnTime;
-            timeDecrease = 0.2D;
+            Reset();
         }
 
         public void Update(GameTime gameTime)
@@ -43,12 +41,14 @@ namespace AsteroidsGame
 
             if(timeToSpawn <= 0)
             {
-                int y = generator.Next((int)gameArea.Y);
+                int y = generator.Next((int)boundary.Height);
                 
                 AsteroidSprite asteroid = 
-                    new AsteroidSprite((int)gameArea.X + image.Width/2, y);
+                    new AsteroidSprite((int)boundary.Width + image.Width/2, y);
 
                 asteroid.Image = image;
+                asteroid.Boundary = boundary;
+
                 if(speed < maxSpeed)
                 {
                     speed += acceleration;
@@ -68,7 +68,13 @@ namespace AsteroidsGame
             foreach(AsteroidSprite asteroid in Asteroids)
             {
                 asteroid.Update(gameTime);
+                if(asteroid.Position.X < -asteroid.Width)
+                {
+                    asteroid.IsAlive = false;
+                }
             }
+
+            Asteroids.RemoveAll(a => a.IsAlive == false);
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -79,6 +85,27 @@ namespace AsteroidsGame
                     asteroid.Position, Color.White);
             }
 
+        }
+
+        public bool CollidesWith(PlayerSprite player)
+        {
+            foreach(AsteroidSprite asteroid in Asteroids)
+            {
+                if(player.BoundingBox.Intersects(asteroid.BoundingBox))
+                {
+                    return true;
+                }
+
+            }
+            return false;
+        }
+
+        public void Reset()
+        {
+            spawnTime = 2.0D;
+            timeToSpawn = spawnTime;
+            timeDecrease = 0.2D;
+            speed = 200;
         }
     }
 }

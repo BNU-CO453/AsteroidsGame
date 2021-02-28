@@ -29,11 +29,13 @@ namespace AsteroidsGame
 
         private PlayerSprite playerSprite;
 
-        private Vector2 gameArea;
+        private Rectangle gameArea;
 
         private AsteroidsController asteroidsController;
 
         private bool inGame;
+
+        private float totalTime;
 
         /// <summary>
         /// Construct a SpaceGame and set the root directory
@@ -44,6 +46,7 @@ namespace AsteroidsGame
 
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            totalTime = 0f;
         }
 
 
@@ -57,7 +60,7 @@ namespace AsteroidsGame
             graphics.PreferredBackBufferHeight = GameAreaHeight;
             graphics.ApplyChanges();
 
-            gameArea = new Vector2(GameAreaWidth, GameAreaHeight);
+            gameArea = new Rectangle(0, 0, GameAreaWidth, GameAreaHeight);
             inGame = false;
 
             base.Initialize();
@@ -72,8 +75,10 @@ namespace AsteroidsGame
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             shipTexture2D = Content.Load<Texture2D>("ship");
+            
             playerSprite = new PlayerSprite(GameAreaWidth/2, GameAreaHeight/2);
             playerSprite.Image = shipTexture2D;
+            playerSprite.Boundary = gameArea;
 
             asteroidTexture2D = Content.Load<Texture2D>("asteroid");
 
@@ -101,12 +106,23 @@ namespace AsteroidsGame
             else if(Keyboard.GetState().IsKeyDown(Keys.Enter))
             {
                 inGame = true;
+                totalTime = 0;
+                asteroidsController.Reset();
             }
 
             if (inGame)
             {
+                totalTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
                 playerSprite.Update(gameTime);
                 asteroidsController.Update(gameTime);
+                
+                if(asteroidsController.CollidesWith(playerSprite))
+                {
+                    inGame = false;
+                    asteroidsController.Asteroids.Clear();
+                    playerSprite.ResetPosition();
+                }
             }
 
             base.Update(gameTime);
@@ -132,6 +148,9 @@ namespace AsteroidsGame
                 DrawStartScreen(spriteBatch);
             }
 
+            spriteBatch.DrawString(timeFont, $"Time: {totalTime:0.00}", 
+                new Vector2(3,3), Color.White);
+            
             spriteBatch.End();
 
             base.Draw(gameTime);

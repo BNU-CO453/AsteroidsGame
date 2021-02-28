@@ -17,7 +17,7 @@ namespace AsteroidsGame
 
         public Rectangle Boundary;
 
-        public Vector2 DefaultPosition;
+        public Vector2 StartPosition;
 
         public Vector2 Position;
 
@@ -28,6 +28,28 @@ namespace AsteroidsGame
 
         public Texture2D Image { get; set; }
 
+        public bool IsVisible { get; set; }
+
+        public bool IsAlive { get; set; }
+
+        public int Width 
+        {
+            get { return Image.Width; }
+        }
+
+        public int Height 
+        {
+            get { return Image.Height; }
+        }
+
+        public Rectangle BoundingBox 
+        {
+            get 
+            {
+                return new Rectangle(
+                    (int)Position.X, (int)Position.Y, Width, Height);
+            }
+        }
         // Variables
 
         protected float deltaTime;
@@ -39,21 +61,15 @@ namespace AsteroidsGame
         public Sprite(int x, int y)
         {
             MaxSpeed = 1000;
-            Speed = 200;
+            Speed = 300;
+
+            IsVisible = true;
+            IsAlive = true;
 
             Position = new Vector2(x, y);
-            DefaultPosition = Position;
+            StartPosition = Position;
         }
 
-        public double GetWidth()
-        {
-            return Image.Width;
-        }
-
-        public double GetHeight()
-        {
-            return Image.Height;
-        }
         public Vector2 GetCenterPosition()
         {
             return new Vector2(Position.X - Image.Width / 2,
@@ -62,7 +78,7 @@ namespace AsteroidsGame
 
         public void ResetPosition()
         {
-            Position = DefaultPosition;
+            Position = StartPosition;
         }
 
         public virtual void Update(GameTime gameTime)
